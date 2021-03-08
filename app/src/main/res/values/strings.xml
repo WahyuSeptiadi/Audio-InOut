@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Micro Speaker</string>
+    <string name="play">play</string>
+    <string name="stop">stop</string>
+    <string name="record">recs</string>
+    <string name="save">save</string>
+    <string name="info_speaker">test speaker</string>
+    <string name="info_micro">test microphone</string>
+    <string name="dot">. . .</string>
+</resources>
