@@ -5,8 +5,11 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +27,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ActivityMainBinding binding;
 
+    /*
+     * FOR SPEAKER
+     */
+    private MediaPlayer mediaPlayer;
+
+    /*
+     * FOR RECORDER
+     */
     private AudioRecord recorder = null;
     private boolean isRecording = false;
     private int bufferSize = 0;
@@ -58,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // FOR POP UP REQUEST PERMISSION USER
         ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE);
 
+        mediaPlayer = new MediaPlayer();
+
         bufferSize = AudioRecord.getMinBufferSize(
                 RECORDER_SAMPLE_RATE,
                 AudioFormat.CHANNEL_OUT_STEREO,
@@ -74,7 +87,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btn_play) {
+
             binding.textInfo.setText(R.string.playing);
+            playAudio();
+
         } else if (view.getId() == R.id.btn_stop) {
 
             binding.textInfo.setText(R.string.stopping);
@@ -94,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // disable btn record
             binding.btnRecord.setEnabled(false);
             binding.btnSave.setEnabled(false);
+            binding.btnPlay.setEnabled(true);
             // save record
             stopRecording();
 
@@ -111,10 +128,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
+    /*
+     * FOR PLAY AUDIO ------------------------------------------------------------------------------
+     */
+    private void playAudio() {
+        String filepath = getBaseContext().getExternalCacheDir().getPath();
+        File file = new File(filepath, AUDIO_RECORDER_FOLDER);
+
+        Uri myUri = Uri.parse((file.getAbsolutePath()) +
+                AUDIO_NAME_AFTER_RECORDER +
+                AUDIO_RECORDER_FILE_EXT_WAV
+        );
+
+        try {
+            if (!file.exists()) {
+                binding.textInfo.setText(R.string.not_found);
+            } else {
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource(getApplicationContext(), myUri);
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     /*
      * FOR START RECORDING -------------------------------------------------------------------------
      */
-
     private void startRecording() {
         recorder = new AudioRecord(
                 MediaRecorder.AudioSource.MIC,
@@ -186,15 +231,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (tempFile.exists()) {
             //noinspection ResultOfMethodCallIgnored
             tempFile.delete();
-         }
+        }
 
         return (file.getAbsolutePath() + "/" + AUDIO_NAME_BEFORE_RECORDER);
     }
 
+
     /*
      * FOR STOP RECORDING --------------------------------------------------------------------------
      */
-
     private void stopRecording() {
         if (null != recorder) {
             isRecording = false;
