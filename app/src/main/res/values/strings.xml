@@ -7,4 +7,10 @@
     <string name="info_speaker">test speaker</string>
     <string name="info_micro">test microphone</string>
     <string name="dot">. . .</string>
+    <string name="playing">Playing audio</string>
+    <string name="stopping">Stop speaker</string>
+    <string name="recording">Recording. . .</string>
+    <string name="saving">Record has been saved</string>
+    <string name="todo">todo</string>
+    <string name="refreshing">Refreshing layout done</string>
 </resources>

@@ -7,6 +7,17 @@
     android:gravity="center"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:id="@+id/img_refresh"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:src="@drawable/ic_round_refresh_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/todo" />
+
     <LinearLayout
         android:id="@+id/test_speaker"
         android:layout_width="wrap_content"
@@ -17,17 +28,19 @@
         app:layout_constraintTop_toBottomOf="@+id/text_info_speaker">
 
         <Button
-            android:id="@+id/play"
+            android:id="@+id/btn_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
+            android:enabled="false"
             android:text="@string/play"
             tools:ignore="ButtonStyle" />
 
         <Button
-            android:id="@+id/stop"
+            android:id="@+id/btn_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:text="@string/stop"
             tools:ignore="ButtonStyle" />
     </LinearLayout>
@@ -42,7 +55,7 @@
         app:layout_constraintTop_toBottomOf="@+id/text_info_micro">
 
         <Button
-            android:id="@+id/record"
+            android:id="@+id/btn_record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
@@ -50,9 +63,10 @@
             tools:ignore="ButtonStyle" />
 
         <Button
-            android:id="@+id/save"
+            android:id="@+id/btn_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:text="@string/save"
             tools:ignore="ButtonStyle" />
     </LinearLayout>
