@@ -1,8 +1,5 @@
 package com.codeart.microspeaker;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -11,9 +8,13 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.codeart.microspeaker.databinding.ActivityMainBinding;
 
@@ -77,8 +78,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 AudioFormat.ENCODING_PCM_16BIT
         );
 
+        File file = new File(getFileName());
+
+        if (file.exists()) {
+            binding.btnReset.setEnabled(true);
+        }
+
         binding.btnPlay.setOnClickListener(this);
-        binding.btnStop.setOnClickListener(this);
+        binding.btnReset.setOnClickListener(this);
         binding.btnRecord.setOnClickListener(this);
         binding.btnSave.setOnClickListener(this);
         binding.imgRefresh.setOnClickListener(this);
@@ -87,64 +94,78 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btn_play) {
-
-            binding.textInfo.setText(R.string.playing);
+            // play audio recorder
             playAudio();
-
-        } else if (view.getId() == R.id.btn_stop) {
-
-            binding.textInfo.setText(R.string.stopping);
-
+            // auto hide lottie speaker in 3.2 second
+            Handler handler = new Handler(getMainLooper());
+            handler.postDelayed(() -> binding.lottieSpeaker.setVisibility(View.GONE), 3200);
+        } else if (view.getId() == R.id.btn_reset) {
+            // visibility
+            binding.textInfo.setText(R.string.deleted);
+            binding.textInfo.setVisibility(View.VISIBLE);
+            // disable btn reset
+            binding.btnReset.setEnabled(false);
+            // delete audio recorder
+            resetAudio();
         } else if (view.getId() == R.id.btn_record) {
-
-            binding.textInfo.setText(R.string.recording);
-            // enable btn save
-            binding.btnSave.setEnabled(true);
-            binding.btnRecord.setEnabled(false);
+            // visibility
+            binding.btnSave.setVisibility(View.VISIBLE);
+            binding.lottieMicrophone.setVisibility(View.VISIBLE);
+            binding.btnRecord.setVisibility(View.GONE);
             // start recording
             startRecording();
-
         } else if (view.getId() == R.id.btn_save) {
-
-            binding.textInfo.setText(R.string.saving);
-            // disable btn record
-            binding.btnRecord.setEnabled(false);
-            binding.btnSave.setEnabled(false);
-            binding.btnPlay.setEnabled(true);
+            // visibility
+            binding.btnRecord.setVisibility(View.VISIBLE);
+            binding.btnSave.setVisibility(View.GONE);
+            binding.lottieMicrophone.setVisibility(View.GONE);
+            // disable btn reset
+            binding.btnReset.setEnabled(true);
             // save record
             stopRecording();
-
+            Toast.makeText(this, R.string.saving, Toast.LENGTH_SHORT).show();
         } else if (view.getId() == R.id.img_refresh) {
-
-            binding.textInfo.setText(R.string.dot);
-            // disable btn record
-            binding.btnRecord.setEnabled(true);
-            binding.btnSave.setEnabled(false);
-            binding.btnPlay.setEnabled(false);
-            binding.btnStop.setEnabled(false);
-
+            // visibility
+            binding.lottieMicrophone.setVisibility(View.GONE);
+            binding.lottieSpeaker.setVisibility(View.GONE);
+            binding.textInfo.setVisibility(View.INVISIBLE);
             Toast.makeText(this, R.string.refreshing, Toast.LENGTH_SHORT).show();
-
         }
     }
 
 
     /*
-     * FOR PLAY AUDIO ------------------------------------------------------------------------------
+     * FOR GET PATH AUDIO RECORDER ------------------------------------------------------------------
      */
-    private void playAudio() {
+    private String getFileName() {
         String filepath = getBaseContext().getExternalCacheDir().getPath();
         File file = new File(filepath, AUDIO_RECORDER_FOLDER);
 
-        Uri myUri = Uri.parse((file.getAbsolutePath()) +
-                AUDIO_NAME_AFTER_RECORDER +
-                AUDIO_RECORDER_FILE_EXT_WAV
-        );
+        if (!file.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            file.mkdirs();
+        }
+
+        return (file.getAbsolutePath() + AUDIO_NAME_AFTER_RECORDER + AUDIO_RECORDER_FILE_EXT_WAV);
+    }
+
+    /*
+     * FOR PLAY AUDIO ------------------------------------------------------------------------------
+     */
+    private void playAudio() {
+        File file = new File(getFileName());
+
+        Uri myUri = Uri.parse(file.getAbsolutePath());
 
         try {
             if (!file.exists()) {
+                binding.textInfo.setVisibility(View.VISIBLE);
                 binding.textInfo.setText(R.string.not_found);
             } else {
+                // visible lottie speaker
+                binding.lottieSpeaker.setVisibility(View.VISIBLE);
+                binding.textInfo.setVisibility(View.INVISIBLE);
+
                 mediaPlayer.reset();
                 mediaPlayer.setDataSource(getApplicationContext(), myUri);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -156,6 +177,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
+    /*
+     * FOR DELETE AUDIO ----------------------------------------------------------------------------
+     */
+    private void resetAudio() {
+        File file = new File(getFileName());
+
+        if (!file.exists()) {
+            binding.textInfo.setText(R.string.not_found);
+        } else {
+            //noinspection ResultOfMethodCallIgnored
+            file.delete();
+        }
+    }
 
     /*
      * FOR START RECORDING -------------------------------------------------------------------------
@@ -253,21 +288,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             recordingThread = null;
         }
 
-        copyWaveFile(getTempFilename(), getFilename());
+        copyWaveFile(getTempFilename(), getFileName());
         deleteTempFile();
     }
 
-    private String getFilename() {
-        String filepath = getBaseContext().getExternalCacheDir().getPath();
-        File file = new File(filepath, AUDIO_RECORDER_FOLDER);
-
-        if (!file.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            file.mkdirs();
-        }
-
-        return (file.getAbsolutePath() + AUDIO_NAME_AFTER_RECORDER + AUDIO_RECORDER_FILE_EXT_WAV);
-    }
 
     private void copyWaveFile(String inFilename, String outFilename) {
         FileInputStream in;

@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">Micro Speaker</string>
     <string name="play">play</string>
-    <string name="stop">stop</string>
+    <string name="reset">reset</string>
     <string name="record">recs</string>
     <string name="save">save</string>
     <string name="info_speaker">test speaker</string>
     <string name="info_micro">test microphone</string>
     <string name="dot">. . .</string>
     <string name="playing">Playing audio</string>
-    <string name="stopping">Stop speaker</string>
+    <string name="deleted">Audio has been deleted</string>
     <string name="recording">Recording. . .</string>
     <string name="saving">Record has been saved</string>
     <string name="todo">todo</string>
